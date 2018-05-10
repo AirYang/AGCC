@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/yangguang/Documents/code/complier/AGCC/include/agcc.h
+
+/home/yangguang/Documents/code/complier/AGCC/src/main.cpp
+../include/agcc.h
+/home/yangguang/Documents/code/complier/AGCC/include/agcc.h
+
