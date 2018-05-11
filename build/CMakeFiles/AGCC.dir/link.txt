@@ -1,1 +1,0 @@
-g++   -g -Wall   CMakeFiles/AGCC.dir/src/main.cpp.o  -o AGCC -rdynamic 

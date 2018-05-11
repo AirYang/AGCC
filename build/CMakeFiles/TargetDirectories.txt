@@ -1,3 +1,0 @@
-/home/yangguang/Documents/code/complier/AGCC/build/CMakeFiles/rebuild_cache.dir
-/home/yangguang/Documents/code/complier/AGCC/build/CMakeFiles/edit_cache.dir
-/home/yangguang/Documents/code/complier/AGCC/build/CMakeFiles/AGCC.dir
