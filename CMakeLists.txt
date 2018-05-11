@@ -1,5 +1,5 @@
 # 使用CMake Tools插件（可选，如果这个项目去到一个没有这个插件的机器也同样可以生成项目）
-include(CMakeToolsHelpers OPTIONAL)
+# include(CMakeToolsHelpers OPTIONAL)
 
 # CMake 最低版本号要求
 cmake_minimum_required(VERSION 2.8)
@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 2.8)
 project(AGCC)
 
 #设置编译器
-SET(CMAKE_C_COMPILER "gcc")
+set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
 
 #c++11标准
