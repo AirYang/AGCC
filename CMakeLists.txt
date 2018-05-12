@@ -15,7 +15,7 @@ set(CMAKE_CXX_COMPILER "g++")
 add_definitions(-std=c++11)
 
 #Debug或者Release -DCMAKE_BUILD_TYPE=Release 或者 -DCMAKE_BUILD_TYPE=Debug
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -D DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
 
 # 查找头文件

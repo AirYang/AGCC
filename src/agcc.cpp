@@ -3,10 +3,13 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <algorithm>
 #include <string>
 
 #include "../include/agcc.h"
 #include "../include/error.h"
+#include "../include/lexer.h"
+#include "../include/token.h"
 #include "../include/type.h"
 
 AGCC::AGCC(int argc, char** argv)
@@ -17,11 +20,12 @@ AGCC::AGCC(int argc, char** argv)
       needAssembler_(false) {
   if (!paraInit(argc, argv)) {
     help();
+#ifdef DEBUG
+    perror("You must give a could be opened .c file\n");
+#endif  // DEBUG
     error(__FILE__, __FUNCTION__, __LINE__);
   }
 }
-
-bool AGCC::run() { return true; }
 
 void AGCC::help() {
   std::string helpStr =
@@ -57,4 +61,17 @@ bool AGCC::paraInit(int argc, char** argv) {
     }
   }
   return fileInput_.is_open();
+}
+
+bool AGCC::run() {
+  Lexer lexer(fileInput_);
+  std::list<Token*> tokens = lexer.getTokens();
+  if (needLexer_) {
+    printf("------Lexer Begin------\n");
+    std::for_each(tokens.begin(), tokens.end(), [](const Token* ctp) {
+      printf("  %s\n", ctp->toString().c_str());
+    });
+    printf("------Lexer End------\n");
+  }
+  return true;
 }

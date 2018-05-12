@@ -2,7 +2,11 @@
 
 C Compiler by C++
 
-* 参考
+## Lex
+
+[Lexer](./doc/lex.md)
+
+## 参考
 
 [8cc](https://github.com/rui314/8cc.git)
 
