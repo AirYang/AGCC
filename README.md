@@ -2,7 +2,9 @@
 
 C Compiler by C++
 
-## Lex
+## 代码结构
+
+### Lex
 
 [Lexer](./doc/lex.md)
 

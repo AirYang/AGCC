@@ -5,7 +5,7 @@ void MacroTest() {
 #ifdef DEBUG
   printf("  DEBUG Macro Open\n");
 #endif  // DEBUG
-  printf("------Macro Test End------\n");
+  printf("------Macro Test End--------\n");
 }
 
 int main(int argc, char** argv) {

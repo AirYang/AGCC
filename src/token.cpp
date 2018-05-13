@@ -115,6 +115,7 @@ static inline const char* tokenTypeToStr(enum TokenType tk) {
     TOKENTYPE_TO_STR(TokenType::DOUBLE_QUOTE)
     TOKENTYPE_TO_STR(TokenType::SEMICOLON)
     TOKENTYPE_TO_STR(TokenType::SHARP)
+    TOKENTYPE_TO_STR(TokenType::NOT_A_TYPE)
   }
 #undef TOKENTYPE_TO_STR
   return "Unsupported Token Type";

@@ -41,5 +41,6 @@ enum class TokenType {
   COMMA,
   DOUBLE_QUOTE,
   SEMICOLON,
-  SHARP
+  SHARP,
+  NOT_A_TYPE
 };

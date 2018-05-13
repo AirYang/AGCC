@@ -71,7 +71,7 @@ bool AGCC::run() {
     std::for_each(tokens.begin(), tokens.end(), [](const Token* ctp) {
       printf("  %s\n", ctp->toString().c_str());
     });
-    printf("------Lexer End------\n");
+    printf("------Lexer End--------\n");
   }
   return true;
 }

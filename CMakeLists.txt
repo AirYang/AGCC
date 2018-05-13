@@ -8,8 +8,8 @@ cmake_minimum_required(VERSION 2.8)
 project(AGCC)
 
 #设置编译器
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
+# set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_CXX_COMPILER "clang++-5.0")
 
 #c++11标准
 add_definitions(-std=c++11)
