@@ -1,5 +1,6 @@
 #include <unistd.h>
 
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 
@@ -9,6 +10,8 @@
 #include "../include/agcc.h"
 #include "../include/error.h"
 #include "../include/lexer.h"
+#include "../include/parser.h"
+#include "../include/syntax_tree.h"
 #include "../include/token.h"
 #include "../include/type.h"
 
@@ -63,12 +66,19 @@ bool AGCC::paraInit(int argc, char** argv) {
   return fileInput_.is_open();
 }
 
+void AGCC::printSyntaxTree(SyntaxTree* tree) {
+  printf("------Syntax Tree Begin------\n");
+  printf("%s", tree->toString());
+  printf("------Syntax Tree End--------\n");
+}
+
 bool AGCC::run() {
   Lexer lexer(fileInput_);
   std::list<Token*> tokens = lexer.getTokens();
   if (needLexer_) {
     printf("------Lexer Begin------\n");
     std::for_each(tokens.begin(), tokens.end(), [](const Token* ctp) {
+      assert(ctp != nullptr);
       printf("  %s\n", ctp->toString().c_str());
     });
     printf("------Lexer End--------\n");

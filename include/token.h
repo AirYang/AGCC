@@ -13,9 +13,14 @@ class Token {
 
  public:
   std::string toString() const;
+  std::string getValue() const;
+  TokenType getType() const;
 
  public:
   static bool isKeyWord(const std::string& value);
+  static bool isControlKeyWord(const std::string& value);
+  static bool isDataKeyWord(const std::string& value);
+  static bool isFuncKeyWord(const std::string& value);
   static bool isBlank(const char& value);
   static bool isDelimiter(const char& value);
   static bool isOperator(const char& value);

@@ -8,3 +8,5 @@ void error(const char* fileName, const char* funcName, int fileLine) {
           fileName, funcName, fileLine);
   exit(-1);
 }
+
+// #define ERROR(msg) error(__FILE__, __FUNCTION__, __LINE__, msg)

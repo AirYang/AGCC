@@ -3,6 +3,9 @@
 #include <fstream>
 #include <string>
 
+class SyntaxTree;
+class SyntaxTreeNode;
+
 class AGCC {
  public:
   AGCC(int argc, char** argv);
@@ -13,6 +16,8 @@ class AGCC {
  private:
   void help();
   bool paraInit(int argc, char** argv);
+  void printSyntaxTree(SyntaxTree* tree);
+  void printSyntaxTreeNode(SyntaxTreeNode* node);
 
  private:
   std::string fileName_;

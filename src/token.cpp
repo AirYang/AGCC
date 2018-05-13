@@ -71,66 +71,32 @@ Token::Token(const TokenType& type, const std::string& value)
 
 Token::~Token() {}
 
-static inline const char* tokenTypeToStr(enum TokenType tk) {
-#define TOKENTYPE_TO_STR(x) \
-  case x:                   \
-    return (#x);
-  switch (tk) {
-    TOKENTYPE_TO_STR(TokenType::KEY_WORD)
-    TOKENTYPE_TO_STR(TokenType::IDENTIFIER)
-    TOKENTYPE_TO_STR(TokenType::DIGIT_CONSTANT)
-    TOKENTYPE_TO_STR(TokenType::OPERATOR)
-    TOKENTYPE_TO_STR(TokenType::SEPARATOR)
-    TOKENTYPE_TO_STR(TokenType::STRING_CONSTANT)
-    TOKENTYPE_TO_STR(TokenType::INCLUDE)
-    TOKENTYPE_TO_STR(TokenType::INT)
-    TOKENTYPE_TO_STR(TokenType::FLOAT)
-    TOKENTYPE_TO_STR(TokenType::CHAR)
-    TOKENTYPE_TO_STR(TokenType::DOUBLE)
-    TOKENTYPE_TO_STR(TokenType::FOR)
-    TOKENTYPE_TO_STR(TokenType::IF)
-    TOKENTYPE_TO_STR(TokenType::ELSE)
-    TOKENTYPE_TO_STR(TokenType::WHILE)
-    TOKENTYPE_TO_STR(TokenType::DO)
-    TOKENTYPE_TO_STR(TokenType::RETURN)
-    TOKENTYPE_TO_STR(TokenType::ASSIGN)
-    TOKENTYPE_TO_STR(TokenType::ADDRESS)
-    TOKENTYPE_TO_STR(TokenType::LT)
-    TOKENTYPE_TO_STR(TokenType::GT)
-    TOKENTYPE_TO_STR(TokenType::SELF_PLUS)
-    TOKENTYPE_TO_STR(TokenType::SELF_MINUS)
-    TOKENTYPE_TO_STR(TokenType::PLUS)
-    TOKENTYPE_TO_STR(TokenType::MINUS)
-    TOKENTYPE_TO_STR(TokenType::MUL)
-    TOKENTYPE_TO_STR(TokenType::DIV)
-    TOKENTYPE_TO_STR(TokenType::GET)
-    TOKENTYPE_TO_STR(TokenType::LET)
-    TOKENTYPE_TO_STR(TokenType::LL_BRACKET)
-    TOKENTYPE_TO_STR(TokenType::RL_BRACKET)
-    TOKENTYPE_TO_STR(TokenType::LB_BRACKET)
-    TOKENTYPE_TO_STR(TokenType::RB_BRACKET)
-    TOKENTYPE_TO_STR(TokenType::LM_BRACKET)
-    TOKENTYPE_TO_STR(TokenType::RM_BRACKET)
-    TOKENTYPE_TO_STR(TokenType::COMMA)
-    TOKENTYPE_TO_STR(TokenType::DOUBLE_QUOTE)
-    TOKENTYPE_TO_STR(TokenType::SEMICOLON)
-    TOKENTYPE_TO_STR(TokenType::SHARP)
-    TOKENTYPE_TO_STR(TokenType::NOT_A_TYPE)
-  }
-#undef TOKENTYPE_TO_STR
-  return "Unsupported Token Type";
-}
-
 std::string Token::toString() const {
   return std::string("TokenType[") + std::string(tokenTypeToStr(type_)) +
          std::string("] Value[") + value_ + std::string("]");
 }
+
+std::string Token::getValue() const { return value_; }
+
+TokenType Token::getType() const { return type_; }
 
 bool Token::isKeyWord(const std::string& value) {
   return ((dataKeyWord_.find(value) != dataKeyWord_.end()) ||
           (controlKeyWord_.find(value) != controlKeyWord_.end()) ||
           (macroKeyWord_.find(value) != macroKeyWord_.end()) ||
           (funcKeyWord_.find(value) != funcKeyWord_.end()));
+}
+
+bool Token::isControlKeyWord(const std::string& value) {
+  return controlKeyWord_.find(value) != controlKeyWord_.end();
+}
+
+bool Token::isDataKeyWord(const std::string& value) {
+  return dataKeyWord_.find(value) != dataKeyWord_.end();
+}
+
+bool Token::isFuncKeyWord(const std::string& value) {
+  return funcKeyWord_.find(value) != funcKeyWord_.end();
 }
 
 bool Token::isBlank(const char& value) {
