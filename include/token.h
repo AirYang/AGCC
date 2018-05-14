@@ -24,6 +24,7 @@ class Token {
   static bool isBlank(const char& value);
   static bool isDelimiter(const char& value);
   static bool isOperator(const char& value);
+  static bool isOperator(const std::string& value);
 
  private:
   TokenType type_;
@@ -33,7 +34,7 @@ class Token {
   static const std::unordered_map<std::string, TokenType> vtkMap_;
   static const std::unordered_set<char> blankSet_;
   static const std::unordered_set<char> delimiterSet_;
-  static const std::unordered_set<char> operatorSet_;
+  static const std::unordered_set<std::string> operatorSet_;
   static const std::unordered_set<std::string> dataKeyWord_;
   static const std::unordered_set<std::string> controlKeyWord_;
   static const std::unordered_set<std::string> macroKeyWord_;

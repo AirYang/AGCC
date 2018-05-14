@@ -68,7 +68,7 @@ bool AGCC::paraInit(int argc, char** argv) {
 
 void AGCC::printSyntaxTree(SyntaxTree* tree) {
   printf("------Syntax Tree Begin------\n");
-  printf("%s", tree->toString());
+  printf("%s", tree->toString().c_str());
   printf("------Syntax Tree End--------\n");
 }
 
@@ -83,5 +83,12 @@ bool AGCC::run() {
     });
     printf("------Lexer End--------\n");
   }
+
+  Parser parser(tokens);
+  SyntaxTree* tree = parser.getSyntaxTree();
+  if (needParser_) {
+    printSyntaxTree(tree);
+  }
+
   return true;
 }

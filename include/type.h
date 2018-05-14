@@ -42,6 +42,23 @@ enum class TokenType {
   DOUBLE_QUOTE,
   SEMICOLON,
   SHARP,
+  // FOR TREE NODE TYPE
+  FIELD_TYPE,
+  Constant,
+  _Constant,
+  Variable,
+  _Variable,
+  ArrayItem,
+  _ArrayName,
+  _ArrayIndex,
+  Operator,
+  _Operator,
+  SingleOperand,
+  DoubleOperand,
+  FUNCTION_NAME,
+  WhileControl,
+  ForControl,
+  IfElseControl,
   NOT_A_TYPE
 };
 
@@ -57,21 +74,39 @@ enum class SentencePattern {
   ERROR
 };
 
-enum class TreeNodeValue {
-  Sentence = 0,
-  Include,
-  Statement,
-  Assignment,
-  Control,
-  Expression,
-  Constant,
-  FunctionStatement,
-  FunctionCall,
-  NOT_A_VALUE
-};
+// enum class TreeNodeValue {
+//   Sentence = 0,
+//   Include,
+//   Statement,
+//   Assignment,
+//   Control,
+//   Expression,
+//   Constant,
+//   FunctionStatement,
+//   FunctionCall,
+//   NOT_A_VALUE
+// };
 
-enum class TreeNodeType { IDENTIFIER = 0, NOT_A_TYPE };
+// enum class TreeNodeType {
+//   // IDENTIFIER = 0,
+//   FIELD_TYPE,
+//   // DIGIT_CONSTANT,
+//   Constant,
+//   _Constant,
+//   Variable,
+//   _Variable,
+//   ArrayItem,
+//   _ArrayName,
+//   _ArrayIndex,
+//   Operator,
+//   _Operator,
+//   // LL_BRACKET,
+//   SingleOperand,
+//   DoubleOperand,
+//   FUNCTION_NAME,
+//   NOT_A_TYPE
+// };
 
 const char* tokenTypeToStr(enum TokenType tk);
-const char* treeNodeValueToStr(enum TreeNodeValue tnv);
-const char* treeNodeTypeToStr(enum TreeNodeType tnt);
+// const char* treeNodeValueToStr(enum TreeNodeValue tnv);
+// const char* treeNodeTypeToStr(enum TreeNodeType tnt);

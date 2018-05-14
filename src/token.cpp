@@ -43,8 +43,11 @@ const std::unordered_set<char> Token::delimiterSet_{'(', ')', '{',  '}', '[',
                                                     ']', ',', '\"', ';'};
 
 // [ '=', '&', '<', '>', '++', '--', '+', '-', '*', '/', '>=', '<=', '!=' ]
-const std::unordered_set<char> Token::operatorSet_{
-    '=', '&', '<', '>', '+', '-', '+', '-', '*', '/', '>', '<', '!'};
+// const std::unordered_set<char> Token::operatorSet_{
+// '=', '&', '<', '>', '+', '-', '+', '-', '*', '/', '>', '<', '!'};
+
+const std::unordered_set<std::string> Token::operatorSet_{
+    "=", "&", "<", ">", "++", "--", "+", "-", "*", "/", ">=", "<=", "!="};
 
 const std::unordered_set<std::string> Token::dataKeyWord_{
     "int", "float", "char", "double", "void"};
@@ -108,5 +111,9 @@ bool Token::isDelimiter(const char& value) {
 }
 
 bool Token::isOperator(const char& value) {
+  return (operatorSet_.find(std::string(1, value)) != operatorSet_.end());
+}
+
+bool Token::isOperator(const std::string& value) {
   return (operatorSet_.find(value) != operatorSet_.end());
 }

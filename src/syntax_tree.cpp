@@ -3,7 +3,7 @@
 #include "../include/syntax_tree.h"
 
 SyntaxTreeNode::SyntaxTreeNode(
-    TreeNodeValue value, TreeNodeType type,
+    const std::string& value, TokenType type,
     const std::unordered_map<std::string, std::string>& extraInfo)
     : value_(value),
       type_(type),
@@ -15,18 +15,18 @@ SyntaxTreeNode::SyntaxTreeNode(
 
 SyntaxTreeNode::~SyntaxTreeNode() {}
 
-TreeNodeValue SyntaxTreeNode::getValue() const { return value_; }
+std::string SyntaxTreeNode::getValue() const { return value_; }
 
-TreeNodeType SyntaxTreeNode::getType() const { return type_; }
+TokenType SyntaxTreeNode::getType() const { return type_; }
 
 std::unordered_map<std::string, std::string> SyntaxTreeNode::getExtraInfo()
     const {
   return extraInfo_;
 }
 
-void SyntaxTreeNode::setValue(TreeNodeValue value) { value_ = value; }
+void SyntaxTreeNode::setValue(const std::string& value) { value_ = value; }
 
-void SyntaxTreeNode::setType(TreeNodeType type) { type_ = type; }
+void SyntaxTreeNode::setType(TokenType type) { type_ = type; }
 
 void SyntaxTreeNode::setExtraInfo(
     const std::unordered_map<std::string, std::string>& extraInfo) {
@@ -54,31 +54,30 @@ void SyntaxTreeNode::setFirstSon(SyntaxTreeNode* firstSon) {
 std::string SyntaxTreeNode::toString() const {
   std::string str = "";
 
-  str += std::string("value[") + treeNodeValueToStr(value_) + "] type[" +
-         treeNodeTypeToStr(type_) + "]";
-
   str +=
-      std::string(" father[") +
-      ((father_ != nullptr) ? treeNodeValueToStr(father_->value_) : "nullptr") +
-      "]";
+      std::string("value[") + value_ + "] type[" + tokenTypeToStr(type_) + "]";
+
+  str += std::string(" father[") +
+         ((father_ != nullptr) ? (father_->value_) : "nullptr") + "]";
 
   str += std::string(" left[") +
-         ((left_ != nullptr) ? treeNodeValueToStr(left_->value_) : "nullptr") +
-         "]";
+         ((left_ != nullptr) ? (left_->value_) : "nullptr") + "]";
 
-  str +=
-      std::string(" right[") +
-      ((right_ != nullptr) ? treeNodeValueToStr(right_->value_) : "nullptr") +
-      "]";
+  str += std::string(" right[") +
+         ((right_ != nullptr) ? (right_->value_) : "nullptr") + "]";
 
   return str;
 }
 
-SyntaxTree::SyntaxTree(SyntaxTreeNode* root = nullptr,
-                       SyntaxTreeNode* current = nullptr)
-    : root_(root), current_(current) {}
+SyntaxTree::SyntaxTree(SyntaxTreeNode* root, SyntaxTreeNode* current,
+                       bool controlFlag)
+    : root_(root), current_(current), controlFlag_(controlFlag) {}
 
-SyntaxTree::~SyntaxTree() { freeNode(root_); }
+SyntaxTree::~SyntaxTree() {
+  if (controlFlag_) {
+    freeNode(root_);
+  }
+}
 
 SyntaxTreeNode* SyntaxTree::getRoot() const { return root_; }
 
@@ -144,7 +143,7 @@ void SyntaxTree::freeNode(SyntaxTreeNode* node) {
 
 std::string SyntaxTree::toStringDo(SyntaxTreeNode* node) const {
   if (node == nullptr) {
-    return;
+    return "";
   }
   std::string str = std::string("  ") + node->toString() + "\n";
   SyntaxTreeNode* child = node->getFirstSon();
@@ -153,4 +152,10 @@ std::string SyntaxTree::toStringDo(SyntaxTreeNode* node) const {
     child = child->getRight();
   }
   return str;
+}
+
+bool SyntaxTree::getControlFlag() const { return controlFlag_; }
+
+void SyntaxTree::setControlFlag(bool controlFlag) {
+  controlFlag_ = controlFlag;
 }

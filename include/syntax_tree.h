@@ -7,19 +7,19 @@
 
 class SyntaxTreeNode {
  public:
-  SyntaxTreeNode(TreeNodeValue value = TreeNodeValue::NOT_A_VALUE,
-                 TreeNodeType type = TreeNodeType::NOT_A_TYPE,
+  SyntaxTreeNode(const std::string& value = std::string(),
+                 TokenType type = TokenType::NOT_A_TYPE,
                  const std::unordered_map<std::string, std::string>& extraInfo =
                      std::unordered_map<std::string, std::string>());
   ~SyntaxTreeNode();
 
  public:
-  TreeNodeValue getValue() const;
-  TreeNodeType getType() const;
+  std::string getValue() const;
+  TokenType getType() const;
   std::unordered_map<std::string, std::string> getExtraInfo() const;
 
-  void setValue(TreeNodeValue value);
-  void setType(TreeNodeType type);
+  void setValue(const std::string& value);
+  void setType(TokenType type);
   void setExtraInfo(
       const std::unordered_map<std::string, std::string>& extraInfo);
 
@@ -36,8 +36,8 @@ class SyntaxTreeNode {
   std::string toString() const;
 
  private:
-  TreeNodeValue value_;
-  TreeNodeType type_;
+  std::string value_;
+  TokenType type_;
   std::unordered_map<std::string, std::string> extraInfo_;
 
   SyntaxTreeNode* father_;
@@ -48,14 +48,17 @@ class SyntaxTreeNode {
 
 class SyntaxTree {
  public:
-  SyntaxTree(SyntaxTreeNode* root = nullptr, SyntaxTreeNode* current = nullptr);
+  SyntaxTree(SyntaxTreeNode* root = nullptr, SyntaxTreeNode* current = nullptr,
+             bool controlFlag = false);
   ~SyntaxTree();
 
  public:
   SyntaxTreeNode* getRoot() const;
   SyntaxTreeNode* getCurrent() const;
+  bool getControlFlag() const;
   void setRoot(SyntaxTreeNode* root);
   void setCurrent(SyntaxTreeNode* current);
+  void setControlFlag(bool controlFlag);
   void addChild(SyntaxTreeNode* child, SyntaxTreeNode* father = nullptr);
   void swapBrotherNode(SyntaxTreeNode* left, SyntaxTreeNode* right);
 
@@ -68,4 +71,5 @@ class SyntaxTree {
  private:
   SyntaxTreeNode* root_;
   SyntaxTreeNode* current_;
+  bool controlFlag_;
 };
