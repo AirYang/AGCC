@@ -8,6 +8,10 @@ C Compiler by C++
 
 [Lexer](./doc/lex.md)
 
+### Parse
+
+[Parser](./doc/grammar.md)
+
 ## 参考
 
 [8cc](https://github.com/rui314/8cc.git)
