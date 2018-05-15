@@ -15,8 +15,9 @@ set(CMAKE_C_COMPILER "gcc-5")
 add_definitions(-std=c++11)
 
 #Debug或者Release -DCMAKE_BUILD_TYPE=Release 或者 -DCMAKE_BUILD_TYPE=Debug
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -D DEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
+set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -D DEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 # 查找头文件
 include_directories(./include)

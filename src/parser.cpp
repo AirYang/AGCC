@@ -52,12 +52,12 @@ SentencePattern Parser::judgeSentencePattern() {
   auto ncit = cit_;
   ++ncit;
 
-  if ((tokenType == TokenType::SHARP) &&
+  if ((tokenType == TokenType::SHARP) && (ncit != tokens_.cend()) &&
       ((*ncit)->getType() == TokenType::INCLUDE)) {
     return SentencePattern::INCLUDE;
   } else if (Token::isControlKeyWord(tokenValue)) {
     return SentencePattern::CONTROL;
-  } else if (Token::isDataKeyWord(tokenValue) &&
+  } else if (Token::isDataKeyWord(tokenValue) && (ncit != tokens_.cend()) &&
              ((*ncit)->getType() == TokenType::IDENTIFIER)) {
     auto nncit = ncit;
     ++nncit;
@@ -74,7 +74,8 @@ SentencePattern Parser::judgeSentencePattern() {
   } else if (tokenType == TokenType::IDENTIFIER) {
     if ((*ncit)->getType() == TokenType::LL_BRACKET) {
       return SentencePattern::FUNCTION_CALL;
-    } else if ((*ncit)->getType() == TokenType::ASSIGN) {
+    } else if ((ncit != tokens_.cend()) &&
+               ((*ncit)->getType() == TokenType::ASSIGN)) {
       return SentencePattern::ASSIGNMENT;
     } else {
       return SentencePattern::ERROR;
@@ -210,6 +211,7 @@ void Parser::doBlock(SyntaxTree* fatherTree) {
         break;
       }
       case SentencePattern::RB_BRACKET: {
+        goto EXIT_BLOCK;
         break;
       }
       default: {
@@ -221,6 +223,7 @@ void Parser::doBlock(SyntaxTree* fatherTree) {
       }
     }
   }
+EXIT_BLOCK:
   delete sentenceTree;
 }
 
@@ -578,12 +581,12 @@ void Parser::doIfElse(SyntaxTreeNode* father) {
   auto ifElseTree = new SyntaxTree();
   ifElseTree->setCurrent(
       new SyntaxTreeNode("Control", TokenType::IfElseControl));
-  ifElseTree->setRoot(ifElseTree->getRoot());
+  ifElseTree->setRoot(ifElseTree->getCurrent());
   tree_->addChild(ifElseTree->getRoot(), father);
 
   auto ifTree = new SyntaxTree();
   ifTree->setCurrent(new SyntaxTreeNode("IfControl"));
-  ifTree->setRoot(ifTree->getRoot());
+  ifTree->setRoot(ifTree->getCurrent());
   ifElseTree->addChild(ifTree->getRoot());
 
   if ((*cit_)->getType() == TokenType::IF) {
