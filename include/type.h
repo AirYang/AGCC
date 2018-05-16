@@ -74,6 +74,8 @@ enum class SentencePattern {
   ERROR
 };
 
+enum class SegmentType { DATA = 0, BSS, TEXT };
+
 // enum class TreeNodeValue {
 //   Sentence = 0,
 //   Include,
