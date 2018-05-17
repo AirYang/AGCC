@@ -8,6 +8,7 @@
 #include <string>
 
 #include "../include/agcc.h"
+#include "../include/assembler.h"
 #include "../include/error.h"
 #include "../include/lexer.h"
 #include "../include/parser.h"
@@ -88,6 +89,11 @@ bool AGCC::run() {
   SyntaxTree* tree = parser.getSyntaxTree();
   if (needParser_) {
     printSyntaxTree(tree);
+  }
+
+  Assembler assem(tree);
+  if (needAssembler_) {
+    assem.saveToFile(fileName_ + ".S");
   }
 
   return true;

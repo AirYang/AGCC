@@ -45,6 +45,11 @@ class Assembler {
   std::unordered_map<std::string, std::string> doExpression(
       const SyntaxTreeNode* node = nullptr);
   void doReturn(const SyntaxTreeNode* node = nullptr);
+  void doTraverseExpression(const SyntaxTreeNode* node = nullptr);
+  bool judgeContainFloat(
+      const std::unordered_map<std::string, std::string>& opA,
+      const std::unordered_map<std::string, std::string>& opB);
+  bool judgeIsFloat(const std::unordered_map<std::string, std::string>& opA);
   std::string doSizeof(const std::string type);
 
  private:

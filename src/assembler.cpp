@@ -162,12 +162,12 @@ void Assembler::doFunctionStatement(const SyntaxTreeNode* node) {
   }
 }
 
-void Assembler::doStatement(const SyntaxTreeNode* node = nullptr) {
+void Assembler::doStatement(const SyntaxTreeNode* node) {
   if (node == nullptr) {
     return;
   }
   std::string line;
-  bool initFlag = false;
+  // bool initFlag = false;
   std::string variableName;
   std::string variableType;
   std::string variableFieldType;
@@ -397,4 +397,401 @@ void Assembler::doAssignment(const SyntaxTreeNode* node) {
 }
 
 std::unordered_map<std::string, std::string> Assembler::doExpression(
-    const SyntaxTreeNode* node) {}
+    const SyntaxTreeNode* node) {
+  if (node == nullptr) {
+    return {};
+  }
+
+  if (node->getType() == TokenType::Constant) {
+    return {{"type", "CONSTANT"}, {"value", node->getValue()}};
+  }
+
+  // operatorStack_ = std::stack<std::string>();
+  operandStack_.clear();
+
+  doTraverseExpression(node);
+
+  static const std::unordered_set<std::string> doubleOperators{
+      "+", "-", "*", "/", ">", "<", ">=", "<="};
+  static const std::unordered_set<std::string> singleOperators{"++", "--"};
+  static const std::unordered_map<std::string, std::string> operatorMap{
+      {">", "jbe"}, {"<", "jae"}, {">=", "jb"}, {"<=", "ja"}};
+
+  while (!operatorStack_.empty()) {
+    auto op = operatorStack_.top();
+    operatorStack_.pop();
+
+    if (doubleOperators.find(op) != doubleOperators.end()) {
+      auto opA = operandStack_.back();
+      operandStack_.pop_back();
+      auto opB = operandStack_.back();
+      operandStack_.pop_back();
+      auto containFloat = judgeContainFloat(opA, opB);
+
+      if (!op.compare("+")) {
+        if (containFloat) {
+          assFileHandler_.insert(
+              ((judgeIsFloat(opA)) ? ("flds ") : ("filds ")) + opA["operand"],
+              SegmentType::TEXT);
+          assFileHandler_.insert(
+              ((judgeIsFloat(opB)) ? ("fadd ") : ("fiadd")) + opB["operand"],
+              SegmentType::TEXT);
+          assFileHandler_.insert("fstps bss_tmp", SegmentType::TEXT);
+          assFileHandler_.insert("flds bss_tmp", SegmentType::TEXT);
+          operandStack_.push_back(
+              {{"type", "VARIABLE"}, {"operand", "bss_tmp"}});
+          symbolTable_["bss_tmp"] = {{"type", "IDENTIFIER"},
+                                     {"field_type", "float"}};
+        } else {
+          if (!opA["type"].compare("ARRAY_ITEM")) {
+            assFileHandler_.insert("movl " + opA["operand_right"] + ", %edi",
+                                   SegmentType::TEXT);
+            assFileHandler_.insert(
+                "movl " + opA["operand"] + "(, %edi, 4), %eax",
+                SegmentType::TEXT);
+          } else if (!opA["type"].compare("VARIABLE")) {
+            assFileHandler_.insert("movl " + opA["operand"] + ", %eax",
+                                   SegmentType::TEXT);
+          } else if (!opA["type"].compare("CONSTANT")) {
+            assFileHandler_.insert("movl $" + opA["operand"] + ", %eax",
+                                   SegmentType::TEXT);
+          }
+
+          if (!opB["type"].compare("ARRAY_ITEM")) {
+            assFileHandler_.insert("movl " + opB["operand_right"] + ", %edi",
+                                   SegmentType::TEXT);
+            assFileHandler_.insert(
+                "addl " + opB["operand"] + "(, %edi, 4), %eax",
+                SegmentType::TEXT);
+          } else if (!opB["type"].compare("VARIABLE")) {
+            assFileHandler_.insert("addl " + opB["operand"] + ", %eax",
+                                   SegmentType::TEXT);
+          } else if (!opB["type"].compare("CONSTANT")) {
+            assFileHandler_.insert("addl $" + opB["operand"] + ", %eax",
+                                   SegmentType::TEXT);
+          }
+
+          assFileHandler_.insert("movl %eax, bss_tmp", SegmentType::TEXT);
+          operandStack_.push_back(
+              {{"type", "VARIABLE"}, {"operand", "bss_tmp"}});
+          symbolTable_["bss_tmp"] = {{"typ", "IDENTIFIER"},
+                                     {"field_type", "int"}};
+        }
+      } else if (!op.compare("-")) {
+        if (containFloat) {
+          if (judgeIsFloat(opA)) {
+            if (!opA["type"].compare("VARIABLE")) {
+              assFileHandler_.insert(
+                  ((judgeIsFloat(opA)) ? ("flds ") : ("filds ")) +
+                      opA["operand"],
+                  SegmentType::TEXT);
+            } else {
+            }
+          } else {
+            if (!opA["type"].compare("CONSTANT")) {
+              assFileHandler_.insert("movl $" + opA["operand"] + ", bss_tmp",
+                                     SegmentType::TEXT);
+            } else {
+            }
+          }
+
+          if (judgeIsFloat(opB)) {
+            if (!opB["type"].compare("VARIABLE")) {
+              assFileHandler_.insert(
+                  ((judgeIsFloat(opB)) ? ("flds ") : ("filds ")) +
+                      opB["operand"],
+                  SegmentType::TEXT);
+              assFileHandler_.insert("fsub " + opB["operand"],
+                                     SegmentType::TEXT);
+            } else {
+            }
+          } else {
+            if (!opB["type"].compare("CONSTANT")) {
+              assFileHandler_.insert("movl $" + opB["operand"] + ", bss_tmp",
+                                     SegmentType::TEXT);
+              assFileHandler_.insert("fisub bss_tmp", SegmentType::TEXT);
+            } else {
+            }
+          }
+          assFileHandler_.insert("fstps bss_tmp", SegmentType::TEXT);
+          assFileHandler_.insert("flds bss_tmp", SegmentType::TEXT);
+          operandStack_.push_back(
+              {{"type", "VARIABLE"}, {"operand", "bss_tmp"}});
+          symbolTable_["bss_tmp"] = {{"type", "IDENTIFIER"},
+                                     {"field_type", "float"}};
+        } else {
+#ifdef DEBUG
+          perror("not supported yet!\n");
+#endif  // DEBUG
+          error(__FILE__, __FUNCTION__, __LINE__);
+        }
+      } else if (!op.compare("*")) {
+        if (!opA["type"].compare("ARRAY_ITEM")) {
+          assFileHandler_.insert("movl " + opA["operand_right"] + ", %edi",
+                                 SegmentType::TEXT);
+          assFileHandler_.insert("movl " + opA["operand"] + "(, %edi, 4), %eax",
+                                 SegmentType::TEXT);
+        } else {
+#ifdef DEBUG
+          perror("other MUL not supported yet!\n");
+#endif  // DEBUG
+          error(__FILE__, __FUNCTION__, __LINE__);
+        }
+
+        if (!opB["type"].compare("ARRAY_ITEM")) {
+          assFileHandler_.insert("movl " + opB["operand_right"] + ", %edi",
+                                 SegmentType::TEXT);
+          assFileHandler_.insert("moll " + opB["operand"] + "(, %edi, 4)",
+                                 SegmentType::TEXT);
+        } else {
+#ifdef DEBUG
+          perror("other MUL not supported yet!\n");
+#endif  // DEBUG
+          error(__FILE__, __FUNCTION__, __LINE__);
+        }
+
+        assFileHandler_.insert("movl %eax, bss_tmp", SegmentType::TEXT);
+        operandStack_.push_back({{"type", "VARIABLE"}, {"operand", "bss_tmp"}});
+        symbolTable_["bss_tmp"] = {{"type", "IDENTIFIER"},
+                                   {"field_type", "int"}};
+
+      } else if (!op.compare("/")) {
+        if (containFloat) {
+          assFileHandler_.insert(
+              ((judgeIsFloat(opA)) ? ("flds ") : ("filds ")) + opA["operand"],
+              SegmentType::TEXT);
+          assFileHandler_.insert(
+              ((judgeIsFloat(opB)) ? ("fdiv ") : ("fidiv ")) + opB["operand"],
+              SegmentType::TEXT);
+          assFileHandler_.insert("fstps bss_tmp", SegmentType::TEXT);
+          assFileHandler_.insert("flds bss_tmp", SegmentType::TEXT);
+          operandStack_.push_back(
+              {{"type", "VARIABLE"}, {"operand", "bss_tmp"}});
+          symbolTable_["bss_tmp"] = {{"type", "IDENTIFIER"},
+                                     {"field_type", "float"}};
+        } else {
+        }
+      } else if (!op.compare(">=")) {
+        if (containFloat) {
+          if (judgeIsFloat(opA)) {
+            if (!opA["type"].compare("VARIABLE")) {
+              assFileHandler_.insert(
+                  ((judgeIsFloat(opA)) ? ("flds ") : ("filds ")) +
+                      opA["operand"],
+                  SegmentType::TEXT);
+            } else {
+#ifdef DEBUG
+              perror("array item not supported when >=\n");
+#endif  // DEBUG
+              error(__FILE__, __FUNCTION__, __LINE__);
+            }
+          } else {
+          }
+
+          if (judgeIsFloat(opB)) {
+            if (!opB["type"].compare("VARIABLE")) {
+              assFileHandler_.insert("fcom " + opB["operand"],
+                                     SegmentType::TEXT);
+            } else {
+#ifdef DEBUG
+              perror("array item not supported when >=\n");
+#endif  // DEBUG
+              error(__FILE__, __FUNCTION__, __LINE__);
+            }
+          } else {
+            if (!opB["type"].compare("CONSTANT")) {
+              assFileHandler_.insert("movl $" + opB["operand"] + ", bss_tmp",
+                                     SegmentType::TEXT);
+              assFileHandler_.insert("fcom bss_tmp", SegmentType::TEXT);
+              assFileHandler_.insert(
+                  operatorMap.at(">=") + " " + labelsIfElse_["label"],
+                  SegmentType::TEXT);
+            } else {
+            }
+          }
+        } else {
+        }
+      } else if (!op.compare("<")) {
+        if (containFloat) {
+        } else {
+          assFileHandler_.insert(
+              ((!opA["type"].compare("CONSTANT")) ? ("movl $") : ("movl ")) +
+                  opA["operand"] + ", %edi",
+              SegmentType::TEXT);
+          assFileHandler_.insert(
+              ((!opB["type"].compare("CONSTANT")) ? ("movl $") : ("movl ")) +
+                  opB["operand"] + ", %esi",
+              SegmentType::TEXT);
+          assFileHandler_.insert("cmpl %esi, %edi", SegmentType::TEXT);
+          assFileHandler_.insert(operatorMap.at("<") + " " + "label_" +
+                                     std::to_string(labelCount_),
+                                 SegmentType::TEXT);
+        }
+      }
+
+    } else if (singleOperators.find(op) != singleOperators.end()) {
+      auto oper = operandStack_.back();
+      operandStack_.pop_back();
+      if (!op.compare("++")) {
+        assFileHandler_.insert("incl " + oper["operand"], SegmentType::TEXT);
+      } else if (!op.compare("--")) {
+      }
+    } else {
+#ifdef DEBUG
+      perror("operator not supported!\n");
+#endif  // DEBUG
+      error(__FILE__, __FUNCTION__, __LINE__);
+    }
+  }
+
+  return (operandStack_.empty())
+             ? std::unordered_map<std::string, std::string>(
+                   {{"type", ""}, {"value", ""}})
+             : std::unordered_map<std::string, std::string>(
+                   {{"type", operandStack_[0]["type"]},
+                    {"value", operandStack_[0]["operand"]}});
+}
+
+void Assembler::doTraverseExpression(const SyntaxTreeNode* node) {
+  if (node == nullptr) {
+    return;
+  }
+
+  switch (node->getType()) {
+    case TokenType::_Variable: {
+      operandStack_.push_back(
+          {{"type", "VARIABLE"}, {"operand", node->getValue()}});
+      break;
+    }
+    case TokenType::_Constant: {
+      operandStack_.push_back(
+          {{"type", "CONSTANT"}, {"operand", node->getValue()}});
+      break;
+    }
+    case TokenType::_Operator: {
+      operatorStack_.push(node->getValue());
+      break;
+    }
+    case TokenType::_ArrayName: {
+      operandStack_.push_back(
+          {{"type", "ARRAY_ITEM"},
+           {"operand", node->getValue()},
+           {"operand_right", node->getRight()->getValue()}});
+      return;
+      break;
+    }
+    default: {}
+  }
+  auto nextNode = node->getFirstSon();
+  while (nextNode != nullptr) {
+    doTraverseExpression(nextNode);
+    nextNode = nextNode->getRight();
+  }
+}
+
+bool Assembler::judgeContainFloat(
+    const std::unordered_map<std::string, std::string>& opA,
+    const std::unordered_map<std::string, std::string>& opB) {
+  return judgeIsFloat(opA) || judgeIsFloat(opB);
+}
+
+bool Assembler::judgeIsFloat(
+    const std::unordered_map<std::string, std::string>& opA) {
+  return (!opA.at("type").compare("VARIABLE")) &&
+         (!symbolTable_[opA.at("operand")]["field_type"].compare("float"));
+}
+
+void Assembler::doControlIf(const SyntaxTreeNode* node) {
+  if (node == nullptr) {
+    return;
+  }
+  auto nextNode = node->getFirstSon();
+  labelsIfElse_["label_else"] = "label_" + std::to_string(labelCount_);
+  ++labelCount_;
+  labelsIfElse_["label_end"] = "label_" + std::to_string(labelCount_);
+  ++labelCount_;
+
+  while (nextNode != nullptr) {
+    if (!(nextNode->getValue().compare("IfControl"))) {
+      if ((nextNode->getFirstSon()->getValue().compare("Expression")) ||
+          (nextNode->getFirstSon()->getRight()->getValue().compare(
+              "Sentence"))) {
+#ifdef DEBUG
+        perror("control if error!\n");
+#endif  // DEBUG
+        error(__FILE__, __FUNCTION__, __LINE__);
+      }
+
+      doExpression(nextNode->getFirstSon());
+      traverse(nextNode->getFirstSon()->getRight()->getFirstSon());
+      assFileHandler_.insert("jmp " + labelsIfElse_["label_end"],
+                             SegmentType::TEXT);
+      assFileHandler_.insert(labelsIfElse_["label_else"] + ":",
+                             SegmentType::TEXT);
+    } else if (!(nextNode->getValue().compare("ElseControl"))) {
+      traverse(nextNode->getFirstSon());
+      assFileHandler_.insert(labelsIfElse_["label_end"] + ":",
+                             SegmentType::TEXT);
+    }
+    nextNode = nextNode->getRight();
+  }
+}
+
+void Assembler::doControlFor(const SyntaxTreeNode* node) {
+  if (node == nullptr) {
+    return;
+  }
+  auto nextNode = node->getFirstSon();
+  size_t cnt = 2;
+  while (nextNode != nullptr) {
+    if (!(nextNode->getValue().compare("Assignment"))) {
+      doAssignment(nextNode);
+    } else if (!(nextNode->getValue().compare("Expression"))) {
+      if (cnt == 2) {
+        ++cnt;
+        assFileHandler_.insert("label_" + std::to_string(labelCount_) + ":",
+                               SegmentType::TEXT);
+        ++labelCount_;
+        doExpression(nextNode);
+      } else {
+        doExpression(nextNode);
+      }
+    } else if (!(nextNode->getValue().compare("Sentence"))) {
+      traverse(nextNode->getFirstSon());
+    }
+    nextNode = nextNode->getRight();
+  }
+  assFileHandler_.insert("jmp label_" + std::to_string(labelCount_ - 1),
+                         SegmentType::TEXT);
+  assFileHandler_.insert("label_" + std::to_string(labelCount_) + ":",
+                         SegmentType::TEXT);
+  ++labelCount_;
+}
+
+void Assembler::doControlWhile(const SyntaxTreeNode* node) {}
+
+void Assembler::doReturn(const SyntaxTreeNode* node) {
+  if (node == nullptr) {
+    return;
+  }
+  auto nextNode = node->getFirstSon();
+  if ((nextNode->getValue().compare("return")) ||
+      (nextNode->getValue().compare("Expression"))) {
+#ifdef DEBUG
+    perror("return error!\n");
+#endif  // DEBUG
+    error(__FILE__, __FUNCTION__, __LINE__);
+  } else {
+    nextNode = nextNode->getFirstSon();
+    auto express = doExpression(nextNode);
+    if (!express["type"].compare("CONSTANT")) {
+      assFileHandler_.insert("pushl $" + express["value"], SegmentType::TEXT);
+      assFileHandler_.insert("call exit", SegmentType::TEXT);
+    } else {
+#ifdef DEBUG
+      perror("return type not supported!\n");
+#endif  // DEBUG
+      error(__FILE__, __FUNCTION__, __LINE__);
+    }
+  }
+}
