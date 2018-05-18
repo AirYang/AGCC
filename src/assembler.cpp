@@ -403,7 +403,7 @@ std::unordered_map<std::string, std::string> Assembler::doExpression(
   }
 
   if (node->getType() == TokenType::Constant) {
-    return {{"type", "CONSTANT"}, {"value", node->getValue()}};
+    return {{"type", "CONSTANT"}, {"value", node->getFirstSon()->getValue()}};
   }
 
   // operatorStack_ = std::stack<std::string>();
@@ -422,9 +422,9 @@ std::unordered_map<std::string, std::string> Assembler::doExpression(
     operatorStack_.pop();
 
     if (doubleOperators.find(op) != doubleOperators.end()) {
-      auto opA = operandStack_.back();
-      operandStack_.pop_back();
       auto opB = operandStack_.back();
+      operandStack_.pop_back();
+      auto opA = operandStack_.back();
       operandStack_.pop_back();
       auto containFloat = judgeContainFloat(opA, opB);
 
@@ -434,7 +434,7 @@ std::unordered_map<std::string, std::string> Assembler::doExpression(
               ((judgeIsFloat(opA)) ? ("flds ") : ("filds ")) + opA["operand"],
               SegmentType::TEXT);
           assFileHandler_.insert(
-              ((judgeIsFloat(opB)) ? ("fadd ") : ("fiadd")) + opB["operand"],
+              ((judgeIsFloat(opB)) ? ("fadd ") : ("fiadd ")) + opB["operand"],
               SegmentType::TEXT);
           assFileHandler_.insert("fstps bss_tmp", SegmentType::TEXT);
           assFileHandler_.insert("flds bss_tmp", SegmentType::TEXT);
@@ -541,7 +541,7 @@ std::unordered_map<std::string, std::string> Assembler::doExpression(
         if (!opB["type"].compare("ARRAY_ITEM")) {
           assFileHandler_.insert("movl " + opB["operand_right"] + ", %edi",
                                  SegmentType::TEXT);
-          assFileHandler_.insert("moll " + opB["operand"] + "(, %edi, 4)",
+          assFileHandler_.insert("mull " + opB["operand"] + "(, %edi, 4)",
                                  SegmentType::TEXT);
         } else {
 #ifdef DEBUG
@@ -604,7 +604,7 @@ std::unordered_map<std::string, std::string> Assembler::doExpression(
                                      SegmentType::TEXT);
               assFileHandler_.insert("fcom bss_tmp", SegmentType::TEXT);
               assFileHandler_.insert(
-                  operatorMap.at(">=") + " " + labelsIfElse_["label"],
+                  operatorMap.at(">=") + " " + labelsIfElse_["label_else"],
                   SegmentType::TEXT);
             } else {
             }
@@ -776,13 +776,13 @@ void Assembler::doReturn(const SyntaxTreeNode* node) {
   }
   auto nextNode = node->getFirstSon();
   if ((nextNode->getValue().compare("return")) ||
-      (nextNode->getValue().compare("Expression"))) {
+      (nextNode->getRight()->getValue().compare("Expression"))) {
 #ifdef DEBUG
     perror("return error!\n");
 #endif  // DEBUG
     error(__FILE__, __FUNCTION__, __LINE__);
   } else {
-    nextNode = nextNode->getFirstSon();
+    nextNode = nextNode->getRight();
     auto express = doExpression(nextNode);
     if (!express["type"].compare("CONSTANT")) {
       assFileHandler_.insert("pushl $" + express["value"], SegmentType::TEXT);
